@@ -13,7 +13,7 @@ function ch2fi_page_header_output() {
     if ( !empty($site_icon_url )) {
         wp_site_icon();
     } else {
-        $icon = plugins_url('favicon.ico', __FILE__);?>
+        $icon = plugins_url('favicon.ico', __FILE__); ?>
         <link rel="shortcut icon" href="<?php echo esc_url($icon); ?>" />
     <?php
     }
