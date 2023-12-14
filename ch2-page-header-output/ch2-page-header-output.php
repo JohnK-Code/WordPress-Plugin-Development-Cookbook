@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Chapter 2 - Plugin Header Output
+Plugin Name: Chapter 2 - Page Header Output
 Plugin URI:
-Description: Declare a plugin that will be visible in the WordPress admin interface
+Description: Plugin used for analytics, working with wp options and WordPress admin config
 Version: 1.0
 Author: Yannick Lefebvre
 Author URI: http://ylefebvre.ca
@@ -61,3 +61,33 @@ function ch2lfa_footer_analytics_code() { ?>
 </script>
 
 <?php }
+
+
+register_activation_hook(__FILE__, 'ch2pho_set_default_options_array');
+
+function ch2pho_set_default_options_array() {
+    ch2pho_get_options();
+}
+function ch2pho_get_options() {
+    $options = get_option('ch2pho_options', array());
+    $new_options['ga_account_name'] = 'UA-0000000-0';
+    $new_options['track_outgoing_links'] = false;
+    $merged_options = wp_parse_args($options, $new_options);
+    $compare_options = array_diff_key($new_options, $options);
+    if (empty($options) || !empty($compare_options)) {
+        update_option('ch2pho_options', $merged_options);
+    }
+    return $merged_options;
+}
+
+
+add_action('admin_menu', 'ch2pho_settings_menu', 1);
+
+function ch2pho_settings_menu() {
+    add_options_page(
+        'My Google Analytics Configuration',
+        'My Google Analytics', 'manage_options',
+        'ch2pho-my-google-analytics',
+        'ch2pho_config_page'
+    );
+}
