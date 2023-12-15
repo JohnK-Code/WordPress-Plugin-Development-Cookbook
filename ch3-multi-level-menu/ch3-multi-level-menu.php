@@ -11,6 +11,7 @@ add_action('admin_menu', 'ch3mlm_admin_menu');
 
 function ch3mlm_admin_menu()
 {
+    // Icon for custom WP menu using an SVG image
     $menu_icon = '<?xml version="1.0" encoding="utf-8"?>
     <svg version="1.1" id="layer" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 130">
     <style type="text/css">.st0{fill:#EC670F;}</style>
