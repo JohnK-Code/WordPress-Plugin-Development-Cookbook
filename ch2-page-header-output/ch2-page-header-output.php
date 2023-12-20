@@ -9,6 +9,8 @@ Author URI: http://ylefebvre.ca
 License: GPLv2
 */
 
+
+// Adding output to page headers using plugin actions - Adds Goolgle Analytics code to to page header using action hook
 add_action('wp_head', 'ch2pho_page_header_output');
 
 function ch2pho_page_header_output()
@@ -35,6 +37,8 @@ function ch2pho_page_header_output()
 <?php }
 
 
+// Inserting link tracking code in the page body using plugin filters - Use WP plugin filter to add a javascript onclick function to any href link in a page or posts content
+// Replaces the href with JS onclick code then adds href back at the end 
 add_filter( 'the_content', 'ch2lfa_link_filter_analytics' );
 
 function ch2lfa_link_filter_analytics ( $the_content ) {
@@ -44,6 +48,8 @@ function ch2lfa_link_filter_analytics ( $the_content ) {
 }
 
 
+// Continued from above - Inserting link tracking code in the page body using plugin filters
+// Use action hook to add JavaScript code to wordpress footer - the JavaScript code below defines the onClick="recordOutboundLink" function called above
 add_action( 'wp_footer', 'ch2lfa_footer_analytics_code' );
 
 function ch2lfa_footer_analytics_code() { ?>
@@ -63,11 +69,16 @@ function ch2lfa_footer_analytics_code() { ?>
 <?php }
 
 
+// Creating default user settings on plugin initialization
+// Create defult options in wp database for plugin when first activated
+// Options stored in an array in database
 register_activation_hook(__FILE__, 'ch2pho_set_default_options_array');
 
 function ch2pho_set_default_options_array() {
     ch2pho_get_options();
 }
+// Seperate function used to get and update wp database options
+// Is used above when plugin first activated but can be called from other parts of the plugin if required
 function ch2pho_get_options() {
     $options = get_option('ch2pho_options', array());
     $new_options['ga_account_name'] = 'UA-0000000-0';
@@ -81,17 +92,28 @@ function ch2pho_get_options() {
 }
 
 
+// Creating an administration page menu item in the settings menu
+// First need to change WP_DEBUG varaiable to true in wp-config.php, this is a default file in the root wp folder
+// Use action hook to call a user defined function - function creates a settings menu item for the plugin in the wp admin settings menu area
 add_action('admin_menu', 'ch2pho_settings_menu', 1);
 
 function ch2pho_settings_menu() {
-    add_options_page(
+    $options_page = add_options_page(
         'My Google Analytics Configuration',
         'My Google Analytics', 'manage_options',
         'ch2pho-my-google-analytics',
         'ch2pho_config_page'
     );
+    if(!empty($options_page)) {
+        add_action('load-' . $options_page, 'ch2pho_help_tabs');
+    }
 }
 
+// Rendering the plugin admin page contents using HTML - page for plugin seetings menu item above
+// Define function call 'ch2pho_config_page' from add_option_page function above
+// Basically creates the page (In HTML) for the plugin settings to be edited in the wp admin 
+// Page accessed by using settings menu item created above in wp admin 
+// NOTE * - wp_nonce_field is a security field in a wordpress form to make sure data has been submitted from the wp admin pages 
 function ch2pho_config_page() {
     // Retrieve plugin options from database
     $options = ch2pho_get_options();
@@ -99,6 +121,12 @@ function ch2pho_config_page() {
 
     <div id="ch2pho-general" class="wrap">
         <h2>My Google Analytics</h2><br/>
+        <?php 
+        if(isset($_GET['message']) && $_GET['message'] == '1') { ?>
+        <div id="message" class="updated fade">
+            <p><strong>Settings Saved</strong></p>
+        </div>
+        <?php } ?>
         <form method="post" action="admin-post.php">
             <input type="hidden" name="action" value="save_ch2pho_options">
 
@@ -118,6 +146,11 @@ function ch2pho_config_page() {
 <?php }
 
 
+// Processing and storing plugin configuration data
+// Action hook to call function that uses data entered in the wp admin plugin settings page created above 
+// Basically - This code takes the settings entered in the plugin settings page I created earlier (wp admin) and stores the updated settings in the database
+// Checks user is authorized to change settings and form is from wp admin (check_admin_referer('ch2pho'))
+// Redirects back to plugin settings page with updated plugin options/settings data
 add_action('admin_init', 'ch2pho_admin_init');
 
 function ch2pho_admin_init() {
@@ -154,6 +187,36 @@ function process_ch2pho_options() {
     // Store updated options array to the database
     update_option('ch2pho_options', $options);
     // Redirect the page to the configuration form
-    wp_redirect(add_query_arg('page', 'ch2pho-my-google-analytics', admin_url('options-general.php')));
+    wp_redirect(add_query_arg(array('page' => 'ch2pho-my-google-analytics', 'message' => '1'), admin_url('options-general.php')));
     exit;
 }
+
+
+function ch2pho_help_tabs() {
+    $screen = get_current_screen();
+    $screen->add_help_tab(array(
+        'id' => 'ch2pho-plugin-help-instruments',
+        'title' => 'Instructions',
+        'callback' => 'ch2pho_plugin_help_instructions',
+    ));
+
+    $screen->add_help_tab(array(
+        'id' => 'ch2pho-plugin-help-faq',
+        'title' => 'FAQ',
+        'callback' => 'ch2pho_plugin_help_faq',        
+    ));
+
+    $screen->set_help_sidebar(
+        '<p>This is the sidebar content</p>'
+    );
+}
+
+
+function ch2pho_plugin_help_instructions() { ?>
+    <p>These are instructions explaining how to use this plugin.</p>
+    <?php }
+
+
+function ch2pho_plugin_help_faq() { ?>
+    <p>These are the most frequently asked questions on the use of this plugin.</p>
+    <?php }

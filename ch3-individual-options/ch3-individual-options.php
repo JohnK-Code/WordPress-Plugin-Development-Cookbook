@@ -6,6 +6,8 @@ Version: 1.0.0
 Author: John Kelly
 */
 
+// Create default user setting on plugin initialization
+// Creates default options in wp database when plugin activated/registered
 register_activation_hook(__FILE__, 'ch3io_set_default_options');
 
 function ch3io_set_default_options() {
