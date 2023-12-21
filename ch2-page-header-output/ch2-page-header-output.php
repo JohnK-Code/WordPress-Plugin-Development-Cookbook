@@ -121,6 +121,7 @@ function ch2pho_config_page() {
 
     <div id="ch2pho-general" class="wrap">
         <h2>My Google Analytics</h2><br/>
+        <!-- Display message below if 'message' is set to '1' - set by 'process_ch2pho_options' function below (wp_redirect)  --> 
         <?php 
         if(isset($_GET['message']) && $_GET['message'] == '1') { ?>
         <div id="message" class="updated fade">
@@ -186,12 +187,19 @@ function process_ch2pho_options() {
 
     // Store updated options array to the database
     update_option('ch2pho_options', $options);
-    // Redirect the page to the configuration form
+    // Redirect the page to the plugin configuration form
+    // array 'message' key is used in url to let page know to display a message that the database has been update using the plugin settings form
+    // Their is code in the HTML for the page above (ch2pho_config_page) that displays the message about update if 'message' is set
     wp_redirect(add_query_arg(array('page' => 'ch2pho-my-google-analytics', 'message' => '1'), admin_url('options-general.php')));
-    exit;
+    exit; // Must always exit after redirect?
 }
 
 
+// Adding custom help pages
+// Displays help tabs on current page when called from plugin settings page (ch2pho_settings_menu)
+// Gets the current screen object and then sets the help tabs to be displayed
+// Each help tab created below calls one of the 2 functions at the bottom to display text/content in the help tab
+// 'ch2pho_plugin_help_instructions' or 'ch2pho_plugin_help_faq' depending on help tab accessed
 function ch2pho_help_tabs() {
     $screen = get_current_screen();
     $screen->add_help_tab(array(
@@ -210,13 +218,9 @@ function ch2pho_help_tabs() {
         '<p>This is the sidebar content</p>'
     );
 }
-
-
 function ch2pho_plugin_help_instructions() { ?>
     <p>These are instructions explaining how to use this plugin.</p>
     <?php }
-
-
 function ch2pho_plugin_help_faq() { ?>
     <p>These are the most frequently asked questions on the use of this plugin.</p>
     <?php }
