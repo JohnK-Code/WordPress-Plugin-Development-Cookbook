@@ -36,13 +36,14 @@ function ch3sapi_get_options() {
 // Calls 'ch3sapi_admin_init' when wordpress admin is accessed
 add_action('admin_init', 'ch3sapi_admin_init');
 
+// Used to define a settings group, section and it's fields
 function ch3sapi_admin_init() {
-    // Register a setting group with a validation
+    // Register/define a setting group with a validation
     // function so that post data hadling is done 
     // automatically for us
     register_setting('ch3sapi_settings', 'ch3sapi_options', 'ch3sapi_validate_options');
 
-    // Add a new settings section within the group
+    // Add a new settings section within the setting group
     add_settings_section('ch3sapi_main_section', 
     'Main Settings', 
     'ch3sapi_main_setting_section_callback',
@@ -50,6 +51,7 @@ function ch3sapi_admin_init() {
 
     // Add each field with its name and function to 
     // use for our new settings, put in new section
+    // Adds a field to an admin settings page section
     add_settings_field('ga_account_name', 
     'Account Name', 
     'ch3sapi_display_text_field',
@@ -72,6 +74,7 @@ function ch3sapi_admin_init() {
     'choices' => array('First', 'Second', 'Third')));
 }
 
+// Validates any data entered on the form on the settings page in admin for this plugin
 function ch3sapi_validate_options($input) {
     foreach(array('ga_account_name') as $option_name) {
         if (isset($input[$option_name])) {
@@ -89,10 +92,13 @@ function ch3sapi_validate_options($input) {
     return $input;
 }
 
+// Function used to echo out any content at the top of the plugin settings section for this plugin settings page in the WP admin
 function ch3sapi_main_setting_section_callback() { ?>
     <p>This is the main configuration section.</p>
 <?php }
 
+// Function used to output the necessary HTML to display the field from the plugin settings page section in the settings page group
+// Basically it is called by the 'add_settings_field' function above to display a field in the settings page form.
 function ch3sapi_display_text_field($data = array()) {
     extract($data);
     $options = ch3sapi_get_options();
@@ -103,6 +109,8 @@ function ch3sapi_display_text_field($data = array()) {
     <br/>
 <?php }
 
+// Function used to output the necessary HTML to display the field from the plugin settings page section in the settings page group
+// Basically it is called by the 'add_settings_field' function above to display a field in the settings page form.
 function ch3sapi_display_check_box($data = array()) {
     extract($data);
     $options = ch3sapi_get_options();
@@ -113,6 +121,8 @@ function ch3sapi_display_check_box($data = array()) {
 <?php }
 
 // ##### Delete later if required
+// Function used to output the necessary HTML to display the field from the plugin settings page section in the settings page group
+// Basically it is called by the 'add_settings_field' function above to display a field in the settings page form.
 function ch3sapi_select_list($data = array()) {
     extract($data);
     $options = ch3sapi_get_options();
@@ -132,7 +142,7 @@ add_action('admin_menu', 'ch3sapi_settings_menu');
 function ch3sapi_settings_menu() {
     add_options_page(
         'My Google Analytics Configuration',
-        'My Google Analytics - Settings APi',
+        'My Google Analytics - Settings API',
         'manage_options',
         'ch3sapi-my-google-analytics',
         'ch3sapi_config_page'
