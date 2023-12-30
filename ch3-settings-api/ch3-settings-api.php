@@ -23,7 +23,8 @@ function ch3sapi_get_options() {
     $options = get_option('ch3sapi_options', array());
     $new_options['ga_account_name'] = 'UA-0000000-0';
     $new_options['track_outgoing_links'] = false;
-    $new_options['select_list'] = 'First'; // ##### Delete later if required
+    $new_options['select_list'] = 'First';
+    $new_options['ga_text_area'] = 'Placeholder';
     $merged_options = wp_parse_args($options, $new_options);
     $compare_options = array_diff_key($new_options, $options);
     if (empty($options) || !empty($compare_options)) {
@@ -36,7 +37,7 @@ function ch3sapi_get_options() {
 // Calls 'ch3sapi_admin_init' when wordpress admin is accessed
 add_action('admin_init', 'ch3sapi_admin_init');
 
-// Used to define a settings group, section and it's fields
+// Used to define a settings group, section and it's fields - For a plugins settings page in wp admin
 function ch3sapi_admin_init() {
     // Register/define a setting group with a validation
     // function so that post data hadling is done 
@@ -51,7 +52,8 @@ function ch3sapi_admin_init() {
 
     // Add each field with its name and function to 
     // use for our new settings, put in new section
-    // Adds a field to an admin settings page section
+    // Adds/Defines a field for the admin settings page
+    // Adds field to section in settings group above
     add_settings_field('ga_account_name', 
     'Account Name', 
     'ch3sapi_display_text_field',
@@ -64,7 +66,6 @@ function ch3sapi_admin_init() {
     'ch3sapi_settings_section',
     'ch3sapi_main_section',
     array('name' => 'track_outgoing_links'));
-    // ##### Delete later if required
     add_settings_field('select_list',
     'Select List',
     'ch3sapi_select_list', 
@@ -72,6 +73,12 @@ function ch3sapi_admin_init() {
     'ch3sapi_main_section',
     array('name' => 'select_list',
     'choices' => array('First', 'Second', 'Third')));
+    add_settings_field('ga_text_area',
+    'Big text field',
+    'ch3sapi_display_text_area',
+    'ch3sapi_settings_section',
+    'ch3sapi_main_section',
+    array('name' => 'ga_text_area'));
 }
 
 // Validates any data entered on the form on the settings page in admin for this plugin
@@ -89,6 +96,7 @@ function ch3sapi_validate_options($input) {
             $input[$option_name] = false;
         }
     }
+
     return $input;
 }
 
@@ -120,7 +128,6 @@ function ch3sapi_display_check_box($data = array()) {
     <?php checked($options[$name]); ?>/>
 <?php }
 
-// ##### Delete later if required
 // Function used to output the necessary HTML to display the field from the plugin settings page section in the settings page group
 // Basically it is called by the 'add_settings_field' function above to display a field in the settings page form.
 function ch3sapi_select_list($data = array()) {
@@ -137,8 +144,21 @@ function ch3sapi_select_list($data = array()) {
     </select>
 <?php }
 
+// Function used to output the necessary HTML to display the field from the plugin settings page section in the settings page group
+// Basically it is called by the 'add_settings_field' function above to display a field in the settings page form.
+function ch3sapi_display_text_area($data = array()) {
+    extract($data);
+    $options = ch3sapi_get_options();
+    ?>
+    <textarea type="text" name="ch3sapi_options[<?php echo esc_html($name); ?>]" rows="5" cols="30">
+    <?php echo esc_html($options[$name]); ?>
+    </textarea>
+<?php }
+
+// Action hook called before wordpress loads the wordpress admin menu in wp administration.
 add_action('admin_menu', 'ch3sapi_settings_menu');
 
+// Define the plugin menu item being added to the settings main menu in the wp administration.
 function ch3sapi_settings_menu() {
     add_options_page(
         'My Google Analytics Configuration',
@@ -149,6 +169,9 @@ function ch3sapi_settings_menu() {
     );
 }
 
+// Function used to display the output/HTML for the plugin settings page in the wp administration settings main menu
+// Displays all the output for the settings defined above for the plugin settings page 
+// How the setting page is configured is added above in other code but this put all the settings together to display the page.
 function ch3sapi_config_page() { ?>
     <div id="ch3sapi-general" class="wrap">
         <h2>My Google Analytics - Settings API</h2>
@@ -160,7 +183,3 @@ function ch3sapi_config_page() { ?>
         </form>
     </div>
 <?php }
-
-
-
-// ######### Test Code Point 
